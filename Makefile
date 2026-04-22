@@ -1,44 +1,36 @@
+# Compilation settings
 CC = gcc
-CFLAGS = -O2 -Wall -Wextra -std=c11
-OMPFLAGS = -fopenmp
+CFLAGS = -std=c11 -Wall -Wextra -O3 -fopenmp
 LDLIBS = -lm
 
-TARGET_SEQ = studentsseq
-TARGET_PAR = studentspar
-TARGET_AVAL = avaliacao_cod
+# Executable files
+EXE_SEQ = studentsseq
+EXE_PAR = studentspar
 
-SRC_SEQ = studentsseq.c
-SRC_PAR = studentspar2.c
-SRC_AVAL = avaliacao_cod.c
+# Source files
+SRC = studentsseq.c studentspar.c
 
-.PHONY: all runseq runpar runaval run clean
+# Object files
+OBJ = $(SRC:.c=.o)
 
-all: $(TARGET_SEQ) $(TARGET_PAR) $(TARGET_AVAL)
+TARGETS = $(SRC:.c=)
 
-$(TARGET_SEQ): $(SRC_SEQ)
-	$(CC) $(CFLAGS) $(OMPFLAGS) -o $(TARGET_SEQ) $(SRC_SEQ) $(LDLIBS)
+.PHONY: all run_seq run_par clean
 
-$(TARGET_PAR): $(SRC_PAR)
-	$(CC) $(CFLAGS) $(OMPFLAGS) -o $(TARGET_PAR) $(SRC_PAR) $(LDLIBS)
+# Rules
+all: $(TARGETS)
 
-$(TARGET_AVAL): $(SRC_AVAL)
-	$(CC) $(CFLAGS) -o $(TARGET_AVAL) $(SRC_AVAL) $(LDLIBS)
+$(TARGETS): %: %.o
+	$(CC) $(CFLAGS) -o $@ $^ $(LDLIBS)
 
-runseq: $(TARGET_SEQ)
-	./$(TARGET_SEQ) < entrada.txt
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
-runpar: $(TARGET_PAR)
-	./$(TARGET_PAR) < entrada.txt
+runseq: $(EXE_SEQ)
+	./$(EXE_SEQ) $(input)
 
-runaval: $(TARGET_AVAL)
-	./$(TARGET_AVAL)
-
-run: runseq runpar runaval
+runpar: $(EXE_PAR)
+	./$(EXE_PAR) $(input)
 
 clean:
-	rm -f $(TARGET_SEQ) $(TARGET_PAR) $(TARGET_AVAL)
-
-#make compila os dois
-#make runseq executa o sequencial
-#make runpar executa o paralelo
-#make run executa os dois em sequência
+	rm -f $(TARGETS) *.o
